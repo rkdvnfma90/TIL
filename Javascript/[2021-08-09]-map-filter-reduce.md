@@ -23,7 +23,7 @@ const products = [
 ```js
 // 어떤 값을 수집할 것인지는 func 함수에 완전히 위임한다.
 const customMap = (func, iter) => {
-  let result = [];
+  const result = [];
 
   for (const i of iter) {
     result.push(func(i));
@@ -88,3 +88,60 @@ console.log(customMap(([key, value]) => [key, value * 2], m)); // [["a", 20], ["
 ## filter
 
 <br>
+
+```js
+const customFilter = (func, iter) => {
+  const result = [];
+
+  for (const i of iter) {
+    if (func(i)) {
+      result.push(i);
+    }
+  }
+
+  return result;
+};
+
+customFilter((p) => p.price > 3000, products);
+customFilter(
+  (n) => n % 2,
+  function* () {
+    yield 1;
+    yield 2;
+    yield 3;
+    yield 4;
+    yield 5;
+  }
+); // [1, 3, 5]
+```
+
+<br>
+
+## reduce
+
+<br>
+
+```js
+const nums = [1, 2, 3, 4, 5];
+
+const customReduce = (func, acc, iter) => {
+  if (!iter) {
+    iter = acc[Symbol.iterator]();
+    acc = iter.next().value;
+  }
+
+  for (const i of iter) {
+    acc = func(acc, i); // 연산을 보조함수에게 넘긴다.
+  }
+
+  return acc;
+};
+
+customReduce((acc, cur) => acc + cur, 0, [1, 2, 3, 4, 5]); // 15
+customReduce((acc, cur) => acc + cur, [1, 2, 3, 4, 5]); // 15
+
+// reduce의 동작 원리
+// const add = (a, b) => a + b;
+// reduce(add, 0, [1, 2, 3, 4, 5]);
+// add(add(add(add(add(0, 1), 2), 3), 4), 5); // 15
+```
