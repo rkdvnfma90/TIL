@@ -84,6 +84,40 @@ console.log(f(0, 1)); // 111
 
 <br>
 
+**이해 잘 안돼서 쪼개서 생각해보자 pipe !!!!**
+
+```js
+const pipe =
+  (f, ...funcs) =>
+  (...args) =>
+    go(f(...args), ...funcs);
+
+function pipe2(f, ...funcs) {
+  // f         : (a, b) => a + b
+  // ...funcs  : [(a) => a + 1, (a) => a + 10]
+  return function (...args) {
+    // ...args : [(a, b) => a + b]
+    return go(f(...args), ...funcs);
+  };
+}
+
+const p = pipe2(
+  (a, b) => a + b,
+  (a) => a + 1,
+  (a) => a + 10
+);
+
+p(0, 1);
+
+// 여기서 pipe2 가 마지막에 go 함수의 실행 결과를 리턴하는데
+// go 함수는 여러 인자를 받아서 값을 하나로 축약하는 reduce와 비슷하다고 했다.
+// 그러니까 결국 p(0, 1) 호출 -> pipe2의 가장 첫 번째 함수에 (0, 1)를 매개변수로 넘겨 실행한 값을
+// 그 이후의 함수 (a) => a + 1의 파라미터로 넘기고, 또 이 결과값을 (a) => a + 10 의 파라미터로 넘겨서
+// 실행한다!
+```
+
+<br>
+
 이렇게 구현하므로써 함수를 위에서부터 아래로 읽을 수 있다.
 
 ```js
@@ -124,6 +158,37 @@ console.log(mult(1)(2));
 
 const mult3 = mult(3);
 console.log(mult3(9));
+```
+
+<br>
+
+**curry도 쪼개서 다시 봐보자 !!!**
+
+```js
+const curry =
+  (func) =>
+  (a, ...rest) =>
+    rest.length ? func(a, ...rest) : (...rest2) => func(a, ...rest2);
+
+const mult = curry((a, b) => a * b);
+
+console.log(mult(2)); // 인자가 1개이므로 함수반환
+console.log(mult(2)(8)); //
+
+function curry2(func) {
+  return function (a, ...rest) {
+    return rest.length
+      ? func(a, ...rest)
+      : function (...rest2) {
+          return func(a, ...rest2);
+        };
+  };
+}
+
+const mult2 = curry2((a, b) => a * b);
+
+console.log(mult2(2)); // 인자를 1개만 전달하면 함수를 반환
+console.log(mult2(2)(8)); // 인자를 2개 이상?
 ```
 
 <br>
